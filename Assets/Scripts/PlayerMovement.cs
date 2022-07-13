@@ -9,10 +9,14 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
+    private BoxCollider2D boxCollider2D;
+
     [Header("References")]
     private float dirX = 0f;
+    
     [SerializeField]private float moveSpeed = 7f;
     [SerializeField]private float jumpSpeed = 14f;
+    [SerializeField]private LayerMask jumpableGround;
 
     private enum MovementState {idle, running, jumping, falling}
     private MovementState mState = MovementState.idle;
@@ -21,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
         rigidbody2D = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        boxCollider2D = GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame
@@ -28,7 +33,7 @@ public class PlayerMovement : MonoBehaviour
     {
         dirX = Input.GetAxisRaw("Horizontal");
         rigidbody2D.velocity = new Vector2(dirX * moveSpeed, rigidbody2D.velocity.y);
-        if(Input.GetKeyDown(KeyCode.Space)) {
+        if(Input.GetKeyDown(KeyCode.Space) && IsGrounded()) {
             rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x,jumpSpeed);
         }
 
@@ -61,5 +66,10 @@ public class PlayerMovement : MonoBehaviour
         }
 
         animator.SetInteger("mState", ((int)mState));
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size,0f,Vector2.down,.1f, jumpableGround);
     }
 }
